@@ -10,22 +10,21 @@ output:
 
 Extract the zip file and read data from CSV.
 
-```{r load data}
 
+```r
 if (!file.exists('activity.csv')) {
   unzip(zipfile = "activity.zip")
 }
 
 activityData <- read.csv(file="activity.csv", header=TRUE)
-
 ```
 
 
 
 
 ## What is mean total number of steps taken per day?
-```{r meansteps}
 
+```r
 # Total steps taken per day
 totalSteps <- aggregate(steps ~ date, activityData, FUN=sum)
 
@@ -33,10 +32,12 @@ totalSteps <- aggregate(steps ~ date, activityData, FUN=sum)
 hist(totalSteps$steps,
      main = "Total Steps per Day",
      xlab = "Number of Steps")
-
 ```
 
-```{r mean}
+![](PA1_template_files/figure-html/meansteps-1.png)<!-- -->
+
+
+```r
 # Mean of total steps taken per day
 meanSteps <- mean(totalSteps$steps, na.rm = TRUE)
 medSteps <- median(totalSteps$steps, na.rm = TRUE)
@@ -45,11 +46,19 @@ medSteps <- median(totalSteps$steps, na.rm = TRUE)
 
 ## What is the average daily activity pattern?
 
-```{r averagepattern}
+
+```r
 # Load the library ggplot2
 # Make a time-series plot of the 5-minute interval and 
 # the average number of steps taken, averaged acoss all days.
 library(ggplot2)
+```
+
+```
+## Warning: package 'ggplot2' was built under R version 3.4.4
+```
+
+```r
 meanStepsByInt <- aggregate(steps ~ interval, activityData, mean)
 ggplot(data = meanStepsByInt, aes(x = interval, y = steps)) +
   geom_line() +
@@ -58,7 +67,10 @@ ggplot(data = meanStepsByInt, aes(x = interval, y = steps)) +
   ylab("Average Number of Steps") +
   theme(plot.title = element_text(hjust = 0.5))
 ```
-```{r}
+
+![](PA1_template_files/figure-html/averagepattern-1.png)<!-- -->
+
+```r
 # The 5-minute interval across all days having  maximum number of steps
 maxInterval <- meanStepsByInt[which.max(meanStepsByInt$steps),]
 ```
@@ -66,15 +78,14 @@ maxInterval <- meanStepsByInt[which.max(meanStepsByInt$steps),]
 
 ## Imputing missing values
 
-```{r}
 
+```r
 # Calculate the total number of missing values in the dataset
 missingVals <- is.na(activityData$steps)
-
-
 ```
 There are 17568 missing values. I will replace these missing values with the 5-day average of that respective interval.
-```{r imputedsteps}
+
+```r
 # Create a new dataset with the missing data filled in.
 alt_activityData <- transform(activityData,
                               steps = ifelse(is.na(activityData$steps),
@@ -90,7 +101,10 @@ hist(impStepsByInt$steps,
      xlab = "Number of Steps")
 ```
 
-```{r}
+![](PA1_template_files/figure-html/imputedsteps-1.png)<!-- -->
+
+
+```r
 impMeanSteps <- mean(impStepsByInt$steps, na.rm = TRUE)
 impMedSteps <- median(impStepsByInt$steps, na.rm = TRUE)
 diffMean = impMeanSteps - meanSteps
@@ -100,7 +114,8 @@ diffTotal = sum(impStepsByInt$steps) - sum(totalSteps$steps)
 There is a difference of 0 in the mean steps of the two dataset. There is a difference of 8.612950910^{4} in the total steps of the two dataset.
 
 ## Are there differences in activity patterns between weekdays and weekends?
-```{r diffweekdaysandweekends}
+
+```r
 # Create a new factor variable in the dataset with two levels - "weekend" and "weekday"
 DayType <- function(date) {
   day <- weekdays(date)
@@ -125,4 +140,6 @@ ggplot(data = meanStepsByDay, aes(x = interval, y = steps)) +
   ylab("Average Number of Steps") +
   theme(plot.title = element_text(hjust = 0.5))
 ```
+
+![](PA1_template_files/figure-html/diffweekdaysandweekends-1.png)<!-- -->
 
